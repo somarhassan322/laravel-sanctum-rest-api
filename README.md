@@ -1,12 +1,14 @@
 # Laravel Sanctum REST API
 
-A RESTful API built with Laravel and MySQL, demonstrating token-based authentication with Laravel Sanctum and protected API endpoints.
+A RESTful API built with Laravel and MySQL, demonstrating token-based authentication with Laravel Sanctum, authenticated CRUD operations, request validation, and resource authorization.
 
 ## Overview
 
-This project demonstrates a backend API architecture using Laravel, MySQL and Laravel Sanctum.
+This project demonstrates a backend API architecture using Laravel, MySQL, and Laravel Sanctum.
 
-The API provides user authentication and authenticated endpoints, with access to protected resources controlled through Sanctum tokens.
+The API provides user authentication and protected task management endpoints. Each task belongs to an authenticated user, and authorization policies ensure that users can only access and modify their own tasks.
+
+The project also includes a Postman collection and automated feature tests covering authentication, CRUD operations, and authorization.
 
 ## Technologies
 
@@ -15,22 +17,55 @@ The API provides user authentication and authenticated endpoints, with access to
 * Laravel Sanctum
 * MySQL
 * REST API
+* Eloquent ORM
 * Postman
+* PHPUnit
 
 ## Features
 
+### Authentication
+
 * User registration
 * User login
-* Token-based authentication
-* Authenticated user endpoint
+* Token-based authentication with Laravel Sanctum
+* Retrieve authenticated user
 * Logout and token revocation
 * Protected API routes
 * Request validation
-* MySQL database integration
-* RESTful API structure
-* API testing with Postman
+
+### Task Management
+
+* Create tasks
+* List authenticated user's tasks
+* Retrieve a task
+* Update tasks
+* Delete tasks
+* Task ownership through user relationships
+* Task completion status
+
+### Authorization
+
+* Laravel Policy-based authorization
+* Users can access only their own tasks
+* Unauthorized access returns HTTP `403 Forbidden`
+* Protected endpoints require Sanctum authentication
+
+### Testing
+
+* Automated Laravel feature tests
+* Authentication tests
+* Protected route tests
+* Task CRUD tests
+* Task ownership and authorization tests
+* Postman API testing
 
 ## API Endpoints
+
+### Health Check
+
+| Method | Endpoint      | Description      | Authentication |
+| ------ | ------------- | ---------------- | -------------- |
+| GET    | `/api/health` | Check API status | No             |
 
 ### Authentication
 
@@ -38,12 +73,22 @@ The API provides user authentication and authenticated endpoints, with access to
 | ------ | --------------- | ------------------------------- | -------------- |
 | POST   | `/api/register` | Register a new user             | No             |
 | POST   | `/api/login`    | Authenticate a user             | No             |
-| POST   | `/api/logout`   | Revoke the current token        | Yes            |
 | GET    | `/api/me`       | Retrieve the authenticated user | Yes            |
+| POST   | `/api/logout`   | Revoke the current token        | Yes            |
+
+### Tasks
+
+| Method | Endpoint            | Description                         | Authentication |
+| ------ | ------------------- | ----------------------------------- | -------------- |
+| GET    | `/api/tasks`        | List the authenticated user's tasks | Yes            |
+| POST   | `/api/tasks`        | Create a new task                   | Yes            |
+| GET    | `/api/tasks/{task}` | Retrieve a task                     | Yes            |
+| PUT    | `/api/tasks/{task}` | Update a task                       | Yes            |
+| DELETE | `/api/tasks/{task}` | Delete a task                       | Yes            |
 
 ## Authentication
 
-After successful login, the API returns an authentication token.
+After successful registration or login, the API returns a Sanctum authentication token.
 
 Protected endpoints require the token using the Bearer authentication scheme:
 
@@ -51,11 +96,88 @@ Protected endpoints require the token using the Bearer authentication scheme:
 Authorization: Bearer YOUR_TOKEN
 ```
 
-## Testing
+For example:
 
-The API was tested using Postman.
+```text
+Authorization: Bearer 1|example-token
+```
 
-The Postman collection can be included in this repository to demonstrate the available endpoints and authentication flow.
+Do not commit real authentication tokens, passwords, API keys, or other secrets to the repository.
+
+## Authorization
+
+Tasks are associated with the authenticated user through a `user_id` foreign key.
+
+Authorization is handled using a Laravel Policy. Users can only:
+
+* View their own tasks
+* Update their own tasks
+* Delete their own tasks
+
+Attempting to access another user's task results in:
+
+```text
+403 Forbidden
+```
+
+This demonstrates resource ownership and authorization at the application level.
+
+## Example Task Request
+
+### Create Task
+
+```http
+POST /api/tasks
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+    "title": "Build Laravel API",
+    "description": "Complete the REST API project",
+    "completed": false
+}
+```
+
+### Update Task
+
+```http
+PUT /api/tasks/1
+Authorization: Bearer YOUR_TOKEN
+Content-Type: application/json
+```
+
+Request body:
+
+```json
+{
+    "title": "Build Laravel REST API",
+    "completed": true
+}
+```
+
+## Postman Collection
+
+A Postman collection is included in the repository for testing the API endpoints.
+
+The collection covers:
+
+* Health check
+* Registration
+* Login
+* Authenticated user
+* Logout
+* Create task
+* List tasks
+* Get task
+* Update task
+* Delete task
+* Authorization testing
+
+Import the collection into Postman and configure the required authentication token when testing protected endpoints.
 
 ## Installation
 
@@ -85,7 +207,9 @@ Generate the Laravel application key:
 php artisan key:generate
 ```
 
-Configure the MySQL database in `.env`, then run:
+Configure the MySQL database in `.env`.
+
+Run the database migrations:
 
 ```bash
 php artisan migrate
@@ -103,9 +227,63 @@ The API will be available at:
 http://127.0.0.1:8000
 ```
 
+## Running Tests
+
+Run the automated test suite with:
+
+```bash
+php artisan test
+```
+
+The tests cover authentication, protected routes, task CRUD operations, and task ownership authorization.
+
 ## Project Structure
 
-The project follows Laravel's standard application structure, with authentication logic handled through controllers, middleware and Sanctum token authentication.
+The project follows Laravel's standard application structure.
+
+Important application components include:
+
+```text
+app/
+├── Http/
+│   ├── Controllers/
+│   │   └── Api/
+│   └── Requests/
+├── Models/
+│   ├── Task.php
+│   └── User.php
+└── Policies/
+    └── TaskPolicy.php
+
+database/
+└── migrations/
+
+postman/
+└── Laravel-Sanctum-REST-API.postman_collection.json
+
+routes/
+└── api.php
+
+tests/
+└── Feature/
+```
+
+## What This Project Demonstrates
+
+This project demonstrates practical backend development concepts including:
+
+* REST API design
+* Laravel application structure
+* Authentication with Laravel Sanctum
+* Token-based API authentication
+* Request validation
+* Eloquent relationships
+* CRUD operations
+* Resource authorization with Laravel Policies
+* MySQL database integration
+* API testing with Postman
+* Automated feature testing
+* Git and GitHub workflow
 
 ## Purpose
 
@@ -116,5 +294,3 @@ This project is part of my backend development portfolio and demonstrates practi
 **Somar Hassan**
 
 Information Technology Engineering — Cybersecurity
-
-GitHub: https://github.com/somarhassan322
