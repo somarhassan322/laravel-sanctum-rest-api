@@ -3,7 +3,6 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Validation\Rule;
 
 class RegisterRequest extends FormRequest
 {
@@ -35,11 +34,6 @@ class RegisterRequest extends FormRequest
                 'string',
                 'min:8',
                 'confirmed',
-            ],
-
-            'role' => [
-                'required',
-                Rule::in(['owner', 'tenant']),
             ],
         ];
     }
